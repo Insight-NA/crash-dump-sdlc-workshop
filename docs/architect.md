@@ -18,14 +18,14 @@ that agents and learners can hold the entire codebase in context during a 60-min
 
 The library models five subsystems commonly found in AAA game engines:
 
-| Subsystem | Header | Source | Purpose |
-|-----------|--------|--------|---------|
-| Allocator | `allocator.h` | `allocator.cpp` | Bump-pointer arena over a caller-provided buffer |
-| ECS | `ecs/world.h` | `ecs/world.cpp` | Minimal entity-component system with generational handles |
-| Physics | `physics/constraint.h` | `physics/constraint.cpp` | Position-based constraint solver over a hash-keyed body table |
-| Simulation — Game Loop | `sim/game_loop.h` | `sim/game_loop.cpp` | Fixed-step accumulator with configurable substep cap |
-| Simulation — RNG | `sim/rng.h` | `sim/rng.cpp` | Deterministic Mersenne Twister wrapper |
-| Frame Budget | `frame_budget.h` | `frame_budget.cpp` | Rolling-window frame timing statistics |
+| Subsystem              | Header                 | Source                   | Purpose                                                       |
+| ---------------------- | ---------------------- | ------------------------ | ------------------------------------------------------------- |
+| Allocator              | `allocator.h`          | `allocator.cpp`          | Bump-pointer arena over a caller-provided buffer              |
+| ECS                    | `ecs/world.h`          | `ecs/world.cpp`          | Minimal entity-component system with generational handles     |
+| Physics                | `physics/constraint.h` | `physics/constraint.cpp` | Position-based constraint solver over a hash-keyed body table |
+| Simulation — Game Loop | `sim/game_loop.h`      | `sim/game_loop.cpp`      | Fixed-step accumulator with configurable substep cap          |
+| Simulation — RNG       | `sim/rng.h`            | `sim/rng.cpp`            | Deterministic Mersenne Twister wrapper                        |
+| Frame Budget           | `frame_budget.h`       | `frame_budget.cpp`       | Rolling-window frame timing statistics                        |
 
 Additionally, `src/engine_demo/eastl_overrides.cpp` provides the mandatory EASTL global
 `operator new[]` overrides required for linking.
@@ -178,14 +178,14 @@ class frame_budget:
 
 ## 4. Design patterns
 
-| Pattern | Where | Description |
-|---------|-------|-------------|
-| Bump-pointer arena | `allocator` | Linear allocator; deallocate is no-op; reclaim by destroying the allocator |
-| Generational handles | `ecs::world` | Slot + generation counter; stale handles detected by generation mismatch |
-| Position-based dynamics | `constraint_solver` | Iterative constraint projection; bodies are directly mutated per iteration |
-| Fixed-step accumulator | `game_loop` | Classic game-physics pattern: accumulate wall-clock dt, drain in fixed-size bites |
-| Rolling-window statistics | `frame_budget` | Circular buffer of N most recent samples; O(1) record, O(N) average |
-| EASTL allocator adapter | `eastl_allocator_ref` | Bridge between engine_demo's allocator and EASTL's allocator concept |
+| Pattern                   | Where                 | Description                                                                       |
+| ------------------------- | --------------------- | --------------------------------------------------------------------------------- |
+| Bump-pointer arena        | `allocator`           | Linear allocator; deallocate is no-op; reclaim by destroying the allocator        |
+| Generational handles      | `ecs::world`          | Slot + generation counter; stale handles detected by generation mismatch          |
+| Position-based dynamics   | `constraint_solver`   | Iterative constraint projection; bodies are directly mutated per iteration        |
+| Fixed-step accumulator    | `game_loop`           | Classic game-physics pattern: accumulate wall-clock dt, drain in fixed-size bites |
+| Rolling-window statistics | `frame_budget`        | Circular buffer of N most recent samples; O(1) record, O(N) average               |
+| EASTL allocator adapter   | `eastl_allocator_ref` | Bridge between engine_demo's allocator and EASTL's allocator concept              |
 
 ---
 
@@ -200,10 +200,10 @@ Languages:    CXX (C++20), OBJC (macOS only, for sandbox force_visible.m)
 
 ### Dependencies (vcpkg.json)
 
-| Package | Purpose |
-|---------|---------|
-| `eastl` | Containers, smart pointers, allocator concept |
-| `gtest` | Unit tests (GoogleTest + GoogleMock) |
+| Package  | Purpose                                                              |
+| -------- | -------------------------------------------------------------------- |
+| `eastl`  | Containers, smart pointers, allocator concept                        |
+| `gtest`  | Unit tests (GoogleTest + GoogleMock)                                 |
 | `raylib` | Sandbox graphical rendering (guarded by `ENGINE_DEMO_BUILD_SANDBOX`) |
 
 ### CMake structure
@@ -226,14 +226,14 @@ CMakeLists.txt (root)
 
 Interactive physics visualizer + headless determinism tracer.
 
-| File | Role |
-|------|------|
-| `main.cpp` | CLI parsing, mode dispatch |
-| `app.cpp` | raylib renderer (interop boundary) |
-| `headless.cpp` | CSV trace output, no graphics |
-| `scene.h` / `scene.cpp` | Four physics scenes (rope, pendulum, cloth, storm) |
-| `telemetry.h` / `telemetry.cpp` | JSONL frame-graph + event stream |
-| `force_visible.m` | macOS Obj-C window-forcing (Apple only) |
+| File                            | Role                                               |
+| ------------------------------- | -------------------------------------------------- |
+| `main.cpp`                      | CLI parsing, mode dispatch                         |
+| `app.cpp`                       | raylib renderer (interop boundary)                 |
+| `headless.cpp`                  | CSV trace output, no graphics                      |
+| `scene.h` / `scene.cpp`         | Four physics scenes (rope, pendulum, cloth, storm) |
+| `telemetry.h` / `telemetry.cpp` | JSONL frame-graph + event stream                   |
+| `force_visible.m`               | macOS Obj-C window-forcing (Apple only)            |
 
 **CLI flags**: `--seed N`, `--frames N`, `--headless`, `--scene rope|pendulum|cloth|storm`,
 `--screenshot PATH [--warmup N]`, `--debug`, `--telemetry-level off|frame|verbose`,
@@ -319,16 +319,16 @@ HITL gate #3 → human merges winning PR
 
 ## 10. Key file paths (quick reference)
 
-| What | Path (relative to repo root) |
-|------|-------------------------------------------|
-| Allocator header | `include/engine_demo/allocator.h` |
-| ECS header | `include/engine_demo/ecs/world.h` |
-| Physics header | `include/engine_demo/physics/constraint.h` |
-| Game loop header | `include/engine_demo/sim/game_loop.h` |
-| RNG header | `include/engine_demo/sim/rng.h` |
-| Frame budget header | `include/engine_demo/frame_budget.h` |
-| Constitution | `specs/constitution.md` |
-| Bug catalog | `fixtures/seeded-bugs.md` |
-| CMake root | `CMakeLists.txt` |
-| vcpkg manifest | `vcpkg.json` |
-| Sandbox entry | `apps/sandbox/main.cpp` |
+| What                | Path (relative to repo root)               |
+| ------------------- | ------------------------------------------ |
+| Allocator header    | `include/engine_demo/allocator.h`          |
+| ECS header          | `include/engine_demo/ecs/world.h`          |
+| Physics header      | `include/engine_demo/physics/constraint.h` |
+| Game loop header    | `include/engine_demo/sim/game_loop.h`      |
+| RNG header          | `include/engine_demo/sim/rng.h`            |
+| Frame budget header | `include/engine_demo/frame_budget.h`       |
+| Constitution        | `specs/constitution.md`                    |
+| Bug catalog         | `fixtures/seeded-bugs.md`                  |
+| CMake root          | `CMakeLists.txt`                           |
+| vcpkg manifest      | `vcpkg.json`                               |
+| Sandbox entry       | `apps/sandbox/main.cpp`                    |

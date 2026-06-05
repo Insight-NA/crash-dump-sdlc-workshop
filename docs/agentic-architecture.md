@@ -63,14 +63,14 @@ flowchart TB
 
 ## Agent Roles
 
-| Agent | Mode File | Role | Tools |
-|-------|-----------|------|-------|
-| Crash Analyzer | `crash-analyzer.chatmode.md` | Parse dumps, produce tree-of-thought diagnosis | crash-dump-mcp |
-| Crash Planner | `crash-planner.chatmode.md` | Design 3 parallel fix strategies | worktree-mcp |
-| Crash Engineer | `crash-engineer.chatmode.md` | Implement fixes in isolated worktrees | worktree-mcp, terminal |
-| Crash QA | `crash-qa.chatmode.md` | Run tests, generate regression tests | worktree-mcp, terminal |
-| Crash Validator | `crash-validator.chatmode.md` | Present comparison + recommendation | worktree-mcp (read) |
-| Crash Orchestrator | `crash-orchestrator.chatmode.md` | Coordinate pipeline, enforce HITL gates | all |
+| Agent              | Mode File                        | Role                                           | Tools                  |
+| ------------------ | -------------------------------- | ---------------------------------------------- | ---------------------- |
+| Crash Analyzer     | `crash-analyzer.chatmode.md`     | Parse dumps, produce tree-of-thought diagnosis | crash-dump-mcp         |
+| Crash Planner      | `crash-planner.chatmode.md`      | Design 3 parallel fix strategies               | worktree-mcp           |
+| Crash Engineer     | `crash-engineer.chatmode.md`     | Implement fixes in isolated worktrees          | worktree-mcp, terminal |
+| Crash QA           | `crash-qa.chatmode.md`           | Run tests, generate regression tests           | worktree-mcp, terminal |
+| Crash Validator    | `crash-validator.chatmode.md`    | Present comparison + recommendation            | worktree-mcp (read)    |
+| Crash Orchestrator | `crash-orchestrator.chatmode.md` | Coordinate pipeline, enforce HITL gates        | all                    |
 
 ## MCP Server Architecture
 
@@ -141,11 +141,11 @@ sequenceDiagram
 
 ## HITL Gates
 
-| Gate | After Phase | Decision Options | Blocks |
-|------|-------------|-----------------|--------|
-| #1 | Analysis | Approve / Reject / Revise | Planning |
-| #2 | Planning | Approve / Reject / Revise | Implementation |
-| #3 | Validation | Merge X / Merge Y / Reject All / Revise | Merge |
+| Gate | After Phase | Decision Options                        | Blocks         |
+| ---- | ----------- | --------------------------------------- | -------------- |
+| #1   | Analysis    | Approve / Reject / Revise               | Planning       |
+| #2   | Planning    | Approve / Reject / Revise               | Implementation |
+| #3   | Validation  | Merge X / Merge Y / Reject All / Revise | Merge          |
 
 **Non-negotiable**: No gate may be bypassed, even if all automated checks pass.
 
@@ -185,12 +185,12 @@ crash-dump-sdlc-workshop/
 
 ## Technology Stack
 
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| MCP Servers | TypeScript + `@modelcontextprotocol/sdk` | Tool abstraction layer |
-| Debugger | cdb.exe (Windows Debugging Tools) | Crash dump parsing |
-| Build | CMake 3.28+ / Ninja | C++ compilation |
-| Test | GoogleTest (ctest) | Validation |
-| VCS | Git worktrees | Parallel branch isolation |
-| Language | C++20 (MSVC/GCC/Clang) | Target codebase |
-| Containers | EASTL | EA Standard Template Library |
+| Component   | Technology                               | Purpose                      |
+| ----------- | ---------------------------------------- | ---------------------------- |
+| MCP Servers | TypeScript + `@modelcontextprotocol/sdk` | Tool abstraction layer       |
+| Debugger    | cdb.exe (Windows Debugging Tools)        | Crash dump parsing           |
+| Build       | CMake 3.28+ / Ninja                      | C++ compilation              |
+| Test        | GoogleTest (ctest)                       | Validation                   |
+| VCS         | Git worktrees                            | Parallel branch isolation    |
+| Language    | C++20 (MSVC/GCC/Clang)                   | Target codebase              |
+| Containers  | EASTL                                    | EA Standard Template Library |

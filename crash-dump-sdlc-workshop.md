@@ -1166,7 +1166,7 @@ The human engineer sees Hypothesis C and recognizes:
 
 - Hypothesis C is _plausible_ — BUG-005 IS real, and it DOES affect constraint IDs
 - But the _causal mechanism_ is wrong — seed truncation → same IDs → same hash distribution (not different)
-- This requires understanding that hash_map non-determinism comes from _internal rehashing/collision resolution_, not from key values themselves
+- This requires understanding that hash*map non-determinism comes from \_internal rehashing/collision resolution*, not from key values themselves
 - The human must apply domain knowledge about hash table internals to make this call
 
 **Result:** HITL prevented a cross-contamination fix (accidentally "fixing" BUG-005 when investigating BUG-004) while the AI did the heavy lifting of correlating the hash_map implementation with the non-determinism symptoms.

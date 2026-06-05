@@ -19,17 +19,16 @@
 
 #include "apps/sandbox/viewport.h"
 
-#include <gtest/gtest.h>
-
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <gtest/gtest.h>
 
 namespace {
 
+using ea_sandbox::screen_to_world;
 using ea_sandbox::viewport;
 using ea_sandbox::world_to_screen;
-using ea_sandbox::screen_to_world;
 
 // ---- Zero-viewport guard ------------------------------------------------
 // Reproduces: GetRenderWidth() == 0 -> all draw calls land at {0,0} -> white window.
@@ -75,16 +74,16 @@ TEST(sandbox_render, nominal_viewport_maps_world_centre_to_screen_centre) {
 
 TEST(sandbox_render, nominal_viewport_world_corners_are_distinct_and_on_screen) {
     viewport vp{1280, 720};
-    const Vector2 tl = world_to_screen(-3.0,  2.0, vp);  // top-left world
-    const Vector2 tr = world_to_screen( 3.0,  2.0, vp);  // top-right world
+    const Vector2 tl = world_to_screen(-3.0, 2.0, vp);   // top-left world
+    const Vector2 tr = world_to_screen(3.0, 2.0, vp);    // top-right world
     const Vector2 bl = world_to_screen(-3.0, -2.0, vp);  // bottom-left world
-    const Vector2 br = world_to_screen( 3.0, -2.0, vp);  // bottom-right world
+    const Vector2 br = world_to_screen(3.0, -2.0, vp);   // bottom-right world
 
     // All four corners must be strictly inside the 1280×720 window.
     for (const auto& pt : {tl, tr, bl, br}) {
-        EXPECT_GT(pt.x, 0.0F)   << "corner x must be inside window";
+        EXPECT_GT(pt.x, 0.0F) << "corner x must be inside window";
         EXPECT_LT(pt.x, 1280.0F) << "corner x must be inside window";
-        EXPECT_GT(pt.y, 0.0F)   << "corner y must be inside window";
+        EXPECT_GT(pt.y, 0.0F) << "corner y must be inside window";
         EXPECT_LT(pt.y, 720.0F) << "corner y must be inside window";
     }
 
@@ -99,14 +98,14 @@ TEST(sandbox_render, nominal_viewport_world_corners_are_distinct_and_on_screen) 
 // This test verifies the fallback produces the same result as the nominal path.
 
 TEST(sandbox_render, fallback_1280x720_equals_nominal_viewport) {
-    constexpr int kWindowWidth  = 1280;
+    constexpr int kWindowWidth = 1280;
     constexpr int kWindowHeight = 720;
 
     const int rw = 0;  // simulate GetRenderWidth() == 0
     const int rh = 0;
     const viewport vp{rw > 0 ? rw : kWindowWidth, rh > 0 ? rh : kWindowHeight};
 
-    EXPECT_EQ(vp.width,  kWindowWidth);
+    EXPECT_EQ(vp.width, kWindowWidth);
     EXPECT_EQ(vp.height, kWindowHeight);
 
     const Vector2 c = world_to_screen(0.0, 0.0, vp);
@@ -119,8 +118,8 @@ TEST(sandbox_render, fallback_1280x720_equals_nominal_viewport) {
 TEST(sandbox_render, screen_to_world_round_trips) {
     viewport vp{1280, 720};
     constexpr double kEps = 1e-4;
-    for (const auto [wx, wy] : std::initializer_list<std::pair<double,double>>{
-             {0.0,  0.0}, {3.0,  2.0}, {-3.0, -2.0}, {1.5, -1.0}}) {
+    for (const auto [wx, wy] : std::initializer_list<std::pair<double, double>>{
+             {0.0, 0.0}, {3.0, 2.0}, {-3.0, -2.0}, {1.5, -1.0}}) {
         const Vector2 s = world_to_screen(wx, wy, vp);
         double rx = 0.0, ry = 0.0;
         screen_to_world(s.x, s.y, vp, rx, ry);
@@ -148,11 +147,15 @@ namespace {
 // Read an entire text file into a string.
 [[nodiscard]] static bool file_contains(const char* path, const char* needle) {
     FILE* f = std::fopen(path, "rb");
-    if (!f) return false;
+    if (!f)
+        return false;
     std::fseek(f, 0, SEEK_END);
     const long sz = std::ftell(f);
     std::rewind(f);
-    if (sz <= 0) { std::fclose(f); return false; }
+    if (sz <= 0) {
+        std::fclose(f);
+        return false;
+    }
     char* buf = new char[static_cast<std::size_t>(sz) + 1];
     const std::size_t n = std::fread(buf, 1, static_cast<std::size_t>(sz), f);
     buf[n] = '\0';
@@ -175,13 +178,14 @@ TEST(sandbox_render, app_cpp_enables_vsync) {
         "../../../../apps/sandbox/app.cpp",
         "apps/sandbox/app.cpp",
     };
-    bool found_file  = false;
+    bool found_file = false;
     bool found_vsync = false;
     for (const char* p : candidates) {
         FILE* f = std::fopen(p, "rb");
-        if (!f) continue;
+        if (!f)
+            continue;
         std::fclose(f);
-        found_file  = true;
+        found_file = true;
         found_vsync = file_contains(p, "FLAG_VSYNC_HINT");
         break;
     }
@@ -199,15 +203,16 @@ TEST(sandbox_render, cmake_links_dwmapi_and_embeds_manifest_on_win32) {
         "../../../../apps/sandbox/CMakeLists.txt",
         "apps/sandbox/CMakeLists.txt",
     };
-    bool found_file     = false;
-    bool found_link     = false;
+    bool found_file = false;
+    bool found_link = false;
     bool found_manifest = false;
     for (const char* p : candidates) {
         FILE* f = std::fopen(p, "rb");
-        if (!f) continue;
+        if (!f)
+            continue;
         std::fclose(f);
-        found_file     = true;
-        found_link     = file_contains(p, "dwmapi");
+        found_file = true;
+        found_link = file_contains(p, "dwmapi");
         found_manifest = file_contains(p, "ea-sandbox.manifest");
         break;
     }

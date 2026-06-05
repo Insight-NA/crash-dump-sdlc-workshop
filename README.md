@@ -10,13 +10,13 @@ material** and a runnable **synthetic C++20 game-engine workspace** with seeded 
 
 ## Start here
 
-| Audience | Document |
-| -------- | -------- |
-| Everyone | [crash-dump-sdlc-workshop.md](crash-dump-sdlc-workshop.md) — the full workshop guide |
-| Instructor | [facilitator-script.md](facilitator-script.md) · [slides.outline.md](slides.outline.md) |
-| Learner | [learner-guide.md](learner-guide.md) · [pre-work-email.md](pre-work-email.md) |
-| Hands-on | [exercises/01-pinpoint.md](exercises/01-pinpoint.md) · [exercises/02-fix-with-test.md](exercises/02-fix-with-test.md) |
-| Reference | [docs/architect.md](docs/architect.md) · [docs/cplusplus-knowledge.md](docs/cplusplus-knowledge.md) · [docs/crash-dump-sdlc-runbook.md](docs/crash-dump-sdlc-runbook.md) |
+| Audience   | Document                                                                                                                                                                 |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Everyone   | [crash-dump-sdlc-workshop.md](crash-dump-sdlc-workshop.md) — the full workshop guide                                                                                     |
+| Instructor | [facilitator-script.md](facilitator-script.md) · [slides.outline.md](slides.outline.md)                                                                                  |
+| Learner    | [learner-guide.md](learner-guide.md) · [pre-work-email.md](pre-work-email.md)                                                                                            |
+| Hands-on   | [exercises/01-pinpoint.md](exercises/01-pinpoint.md) · [exercises/02-fix-with-test.md](exercises/02-fix-with-test.md)                                                    |
+| Reference  | [docs/architect.md](docs/architect.md) · [docs/cplusplus-knowledge.md](docs/cplusplus-knowledge.md) · [docs/crash-dump-sdlc-runbook.md](docs/crash-dump-sdlc-runbook.md) |
 
 ## Prerequisites
 
@@ -26,7 +26,7 @@ material** and a runnable **synthetic C++20 game-engine workspace** with seeded 
   Clang 17+).
 - **vcpkg** in manifest mode (provides EASTL + GoogleTest). Full clone, not `--depth 1`.
 - **Git** (the `worktree-mcp` server drives `git worktree`).
-- *(Live `.dmp` demo only)* **Windows Debugging Tools** (`cdb.exe`) — optional; the manual
+- _(Live `.dmp` demo only)_ **Windows Debugging Tools** (`cdb.exe`) — optional; the manual
   Plan/Edit-mode exercises run cross-platform without a dump.
 
 ## Repository layout

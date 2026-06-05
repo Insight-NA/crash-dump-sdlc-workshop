@@ -27,8 +27,8 @@ no exceptions, no RTTI.
 ## Spec-Kit
 
 The constitution at [`specs/constitution.md`](specs/constitution.md) is ground truth. Every
-spec-kit `/implement` task respects it. If a task requires violating an article, *the spec
-is wrong*.
+spec-kit `/implement` task respects it. If a task requires violating an article, _the spec
+is wrong_.
 
 ## Tests
 

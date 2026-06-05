@@ -1,11 +1,10 @@
 {
-    "chat.promptFilesRecommendations": {
-        "crash-dump-intake": true,
-        "tree-of-thought-analysis": true,
-        "resolution-brief": true,
-        "regression-test-generation": true,
-        "fix-validation": true,
-        "resolution-report": true
-    }
+  "chat.promptFilesRecommendations": {
+    "crash-dump-intake": true,
+    "tree-of-thought-analysis": true,
+    "resolution-brief": true,
+    "regression-test-generation": true,
+    "fix-validation": true,
+    "resolution-report": true
+  }
 }
-

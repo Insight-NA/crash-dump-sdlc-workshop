@@ -5,12 +5,12 @@ showcase driven by the `engine_demo` library and rendered with raylib.
 
 Four scenes selectable at runtime:
 
-| # | Scene             | What it shows                                                         |
-|---|-------------------|-----------------------------------------------------------------------|
-| 1 | rope              | 24-node verlet chain + 32 free particles (the original demo)          |
-| 2 | pendulum tower    | 4 chains of length 16 / 12 / 18 / 10, anchored across the top         |
-| 3 | cloth             | 12 × 8 grid with structural + alternating shear constraints (~250 edges) |
-| 4 | particle storm    | 500 free particles orbiting two gravity wells                         |
+| #   | Scene          | What it shows                                                            |
+| --- | -------------- | ------------------------------------------------------------------------ |
+| 1   | rope           | 24-node verlet chain + 32 free particles (the original demo)             |
+| 2   | pendulum tower | 4 chains of length 16 / 12 / 18 / 10, anchored across the top            |
+| 3   | cloth          | 12 × 8 grid with structural + alternating shear constraints (~250 edges) |
+| 4   | particle storm | 500 free particles orbiting two gravity wells                            |
 
 This is the **cold-open** demo for Session 01 and the **canonical bug target**
 for Sessions 02–04: every committed seeded bug surfaces visually here.
@@ -19,9 +19,11 @@ for Sessions 02–04: every committed seeded bug surfaces visually here.
 
 > **Prerequisite — `VCPKG_ROOT`:** vcpkg must be available and `$VCPKG_ROOT` must point to it.
 > If you cloned vcpkg to `~/vcpkg`:
+>
 > ```bash
 > export VCPKG_ROOT="$HOME/vcpkg"
 > ```
+>
 > vcpkg must be a **full clone** (not `--depth 1`) so the manifest's `builtin-baseline`
 > commit resolves. If you cloned shallow, run `git fetch --unshallow` inside `$VCPKG_ROOT`.
 
@@ -106,38 +108,38 @@ ea-sandbox --help
 
 ### Interactive controls
 
-| Key             | Action                                                               |
-| --------------- | -------------------------------------------------------------------- |
-| `1` / `2` / `3` / `4` | Switch scene (rope / pendulum tower / cloth / particle storm)  |
-| `Space`         | Pause / resume the simulation                                        |
-| `S`             | Single-step one fixed step (only meaningful when paused)             |
-| `R`             | Reseed without changing the seed input — visualizes BUG-004          |
-| `H`             | Toggle the HUD (clean capture mode)                                  |
-| `T`             | Toggle particle motion trails                                        |
-| `+` / `-`       | Speed up / slow down simulation time                                 |
-| `LMB` drag      | Grab + drag the nearest dynamic rope/cloth node                      |
-| `RMB`           | Spawn a 12-particle burst at the cursor                              |
-| `F1`            | Deliberate null-deref crash (Session 02 crash-dump demo)             |
-| `Esc`           | Quit                                                                 |
+| Key                   | Action                                                        |
+| --------------------- | ------------------------------------------------------------- |
+| `1` / `2` / `3` / `4` | Switch scene (rope / pendulum tower / cloth / particle storm) |
+| `Space`               | Pause / resume the simulation                                 |
+| `S`                   | Single-step one fixed step (only meaningful when paused)      |
+| `R`                   | Reseed without changing the seed input — visualizes BUG-004   |
+| `H`                   | Toggle the HUD (clean capture mode)                           |
+| `T`                   | Toggle particle motion trails                                 |
+| `+` / `-`             | Speed up / slow down simulation time                          |
+| `LMB` drag            | Grab + drag the nearest dynamic rope/cloth node               |
+| `RMB`                 | Spawn a 12-particle burst at the cursor                       |
+| `F1`                  | Deliberate null-deref crash (Session 02 crash-dump demo)      |
+| `Esc`                 | Quit                                                          |
 
 ### Bug-visibility cheat sheet
 
-| Anchor   | Where it surfaces in the HUD                                            |
-| -------- | ----------------------------------------------------------------------- |
-| BUG-002  | `wall=… sim=… drift=±…ms` line (game_loop float accumulator drift)      |
-| BUG-004  | `trace_digest=…` line; press `R` and watch it diverge despite same seed |
-| BUG-006  | `frame_avg=…ms` rolling-window readout (frame_budget seeded defect)     |
+| Anchor  | Where it surfaces in the HUD                                            |
+| ------- | ----------------------------------------------------------------------- |
+| BUG-002 | `wall=… sim=… drift=±…ms` line (game_loop float accumulator drift)      |
+| BUG-004 | `trace_digest=…` line; press `R` and watch it diverge despite same seed |
+| BUG-006 | `frame_avg=…ms` rolling-window readout (frame_budget seeded defect)     |
 
 ### Determinism digest matrix
 
 Headless seed=42, 60 fixed-step frames (verified locally on macOS / AppleClang 17):
 
-| Scene           | `trace_digest` (final state)        |
-| --------------- | ----------------------------------- |
-| rope            | `33a6319d856d4869`                  |
-| pendulum tower  | `b0b37e5a36eafa6a`                  |
-| cloth           | `ef6340b55f1b9edc`                  |
-| particle storm  | `968ce23fc350cfaf`                  |
+| Scene          | `trace_digest` (final state) |
+| -------------- | ---------------------------- |
+| rope           | `33a6319d856d4869`           |
+| pendulum tower | `b0b37e5a36eafa6a`           |
+| cloth          | `ef6340b55f1b9edc`           |
+| particle storm | `968ce23fc350cfaf`           |
 
 The rope digest is the canonical CI golden-trace value referenced by
 `.github/workflows/ci-build-demo-workspace.yml`. The other three are
@@ -170,14 +172,14 @@ Stderr tick (always on, ~1 Hz):
 
 JSONL record kinds:
 
-| `kind`     | When                       | Notable fields                                                                |
-| ---------- | -------------------------- | ----------------------------------------------------------------------------- |
-| `boot`     | startup (level ≥ frame)    | `level`, `watchdog`                                                           |
-| `frame`    | every frame (level ≥ frame)| `t_input_us`, `t_step_us`, `t_draw_world_us`, `t_draw_hud_us`, `t_swap_us`, `t_sleep_us`, `t_total_us`, `fps`, `vp_w`, `vp_h`, `focused`, `minimized`, `hidden` |
-| `physics`  | every frame (verbose)      | `bodies`, `constraints`, `particles`, `paused`, `scene`, `seed`, `state_digest`, `substeps`, `sim_time` |
-| `render`   | every frame (verbose)      | `world_calls`, `hud_real_refreshes`, `hud_blits`, `draw_text_calls`           |
-| `event`    | transitions / inputs       | `category` ∈ {`window`, `input`, `scene`, `loop`, `raylib`, `watchdog`, `crash`, `boot`} |
-| `shutdown` | clean exit                 | `t_us`                                                                        |
+| `kind`     | When                        | Notable fields                                                                                                                                                  |
+| ---------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `boot`     | startup (level ≥ frame)     | `level`, `watchdog`                                                                                                                                             |
+| `frame`    | every frame (level ≥ frame) | `t_input_us`, `t_step_us`, `t_draw_world_us`, `t_draw_hud_us`, `t_swap_us`, `t_sleep_us`, `t_total_us`, `fps`, `vp_w`, `vp_h`, `focused`, `minimized`, `hidden` |
+| `physics`  | every frame (verbose)       | `bodies`, `constraints`, `particles`, `paused`, `scene`, `seed`, `state_digest`, `substeps`, `sim_time`                                                         |
+| `render`   | every frame (verbose)       | `world_calls`, `hud_real_refreshes`, `hud_blits`, `draw_text_calls`                                                                                             |
+| `event`    | transitions / inputs        | `category` ∈ {`window`, `input`, `scene`, `loop`, `raylib`, `watchdog`, `crash`, `boot`}                                                                        |
+| `shutdown` | clean exit                  | `t_us`                                                                                                                                                          |
 
 Common triage queries with `jq`:
 

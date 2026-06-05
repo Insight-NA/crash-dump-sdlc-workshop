@@ -19,18 +19,18 @@ The win condition is **provenance-grounded**: every claim Copilot makes traces t
 
 ## Setup
 
-- Demo workspace: `output/ea-cpp-games/` built via `cmake --preset default-debug` then `--build`.
-- Fixture: `output/ea-cpp-games/fixtures/crash_dumps/BUG-001/` containing `repro.dmp`, `engine_demo_tests.pdb`, and `source_rev.txt`.
-- Capture script: `output/ea-cpp-games/fixtures/crash_dumps/repro/run-and-capture.{sh,ps1}` is rerun **the day before** the session to refresh artifacts (PDB drift is the #1 demo failure).
-- Required Copilot context for the demo: `#file:fixtures/crash_dumps/BUG-001/repro.dmp` + `#file:src/allocator.cpp` + `#file:tests/allocator_test.cpp`.
+- Demo workspace: the repo root, built via `cmake --preset default-debug` then `--build`.
+- Fixture: `fixtures/crash_dumps/BUG-001/` containing `repro.cpp`, `capture.sh`/`capture.ps1`, and `README.md` (capture-it-yourself model — no `.dmp` is committed).
+- Capture script: `fixtures/crash_dumps/BUG-001/capture.sh` (Linux/macOS) or `capture.ps1` (Windows) is rerun **the day before** the session to refresh the dump against locally-built symbols (symbol drift is the #1 demo failure).
+- Required Copilot context for the demo: `#file:fixtures/crash_dumps/BUG-001/BUG-001.dmp.local` + `#file:src/engine_demo/allocator.cpp` + `#file:tests/engine_demo/test_allocator.cpp`.
 
 ## Facilitation script — Phase 1: pinpoint the faulting frame (15 min)
 
 Switch Copilot to **Plan Mode**. Type verbatim:
 
-> _"Read `#file:fixtures/crash_dumps/BUG-001/repro.dmp`. Identify the faulting frame: function name, source file, line number. Cite the offset within the function. Do not propose fixes yet."_
+> _"Read `#file:fixtures/crash_dumps/BUG-001/BUG-001.dmp.local`. Identify the faulting frame: function name, source file, line number. Cite the offset within the function. Do not propose fixes yet."_
 
-**Expected:** Copilot returns frame `engine_demo::arena_allocator::allocate` at `src/allocator.cpp:LL`.
+**Expected:** Copilot returns frame `engine_demo::arena_allocator::allocate` at `src/engine_demo/allocator.cpp:LL`.
 
 > **HITL gate:** facilitator confirms the frame against the actual disassembly before continuing. If Copilot mis-attributes, that's a teaching moment — show how to pull `windbg` / `lldb` output and feed it back as additional context.
 
@@ -48,7 +48,7 @@ Type verbatim:
 
 Switch to **Edit Mode**. Type verbatim:
 
-> _"Propose the smallest fix that makes the failing test in `#file:tests/allocator_test.cpp` pass without violating `#file:.github/instructions/cpp-snippets.instructions.md`. Show the diff only; do not run anything yet."_
+> _"Propose the smallest fix that makes the failing test in `#file:tests/engine_demo/test_allocator.cpp` pass without violating `#file:.github/instructions/cpp-snippets.instructions.md`. Show the diff only; do not run anything yet."_
 
 > **HITL gate:** facilitator reviews the diff. _"Does this fix introduce any new behavior? Does it satisfy the constitution?"_ If yes, run:
 
@@ -63,7 +63,7 @@ The previously failing test must pass; no other test must regress.
 1. **Stale PDB.** If the PDB does not match the source, every line attribution is wrong. The capture script enforces match — re-run it the day before.
 2. **Copilot guesses without citing.** When that happens, restart with _"cite the line"_. Do not negotiate.
 3. **Premature fix.** Skipping Phase 2 produces a "fix" that masks the bug. Always force the trace.
-4. **Token budget exhaustion** on large allocators — pin only the relevant `src/allocator.cpp` and the test, not the whole subsystem.
+4. **Token budget exhaustion** on large allocators — pin only the relevant `src/engine_demo/allocator.cpp` and the test, not the whole subsystem.
 
 ## Recovery script
 

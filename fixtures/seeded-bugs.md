@@ -12,7 +12,7 @@
 | BUG-005  | sim          | `src/engine_demo/sim/rng.cpp:LL`            | Seed downcast   | 04 (sec) | `uint64_t` seed downcast to `uint32_t` when forwarding to `mt19937` constructor (CWE-197). |
 | BUG-006  | frame budget | `src/engine_demo/frame_budget.cpp:LL`       | Off-by-one      | 03       | Rolling window advances index after read instead of before; first frame's sample is double-counted. |
 
-## Triage rubric (per `factory-overlay/demo-patterns/proactive-issue-hunt.md`)
+## Triage rubric
 
 For each candidate Copilot surfaces:
 

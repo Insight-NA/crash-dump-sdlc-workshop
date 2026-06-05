@@ -15,7 +15,7 @@
 
 > **Do:** confirm `BUG-001.dmp.local` (or `.core.local`) exists; if not, run `fixtures/crash_dumps/BUG-001/capture.sh` (Linux) or `capture.ps1` (Windows).
 > **Do:** open `src/engine_demo/allocator.cpp` and `include/engine_demo/allocator.h` side by side.
-> **Do:** load `factory-overlay/demo-patterns/crash-dump-triage.md` in a third tab as facilitator reference.
+> **Do:** load `docs/crash-dump-triage.md` in a third tab as facilitator reference.
 > **Watch for:** the dump _must_ match the locally-built `repro.exe`/`./repro` symbols. If symbols are stale, re-capture.
 
 ## Opening (0:00 – 0:05)

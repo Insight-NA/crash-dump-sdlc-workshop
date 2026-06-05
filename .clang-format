@@ -1,0 +1,35 @@
+---
+# clang-format for engine_demo. Google base, 4-space indent, ColumnLimit 100.
+BasedOnStyle: Google
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 100
+
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortLoopsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+BreakBeforeBraces: Attach
+BinPackArguments: false
+BinPackParameters: false
+PointerAlignment: Left
+DerivePointerAlignment: false
+
+IncludeBlocks: Regroup
+IncludeCategories:
+  # EASTL first (preferred container library).
+  - Regex: '^<EASTL/'
+    Priority: 1
+  # Project headers second.
+  - Regex: '^"engine_demo/'
+    Priority: 2
+  - Regex: '^"'
+    Priority: 3
+  # System headers last.
+  - Regex: '^<'
+    Priority: 4
+
+NamespaceIndentation: None
+FixNamespaceComments: true
+SortIncludes: CaseSensitive

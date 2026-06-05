@@ -1,0 +1,17 @@
+* text=auto eol=lf
+
+# Source files.
+*.h        text diff=cpp
+*.hpp      text diff=cpp
+*.cpp      text diff=cpp
+*.cc       text diff=cpp
+*.cxx      text diff=cpp
+*.inl      text diff=cpp
+
+# CMake.
+CMakeLists.txt text
+*.cmake        text
+
+# Binary fixtures (committed crash-dump fixtures + symbol packages).
+*.dmp binary
+*.pdb binary

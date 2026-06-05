@@ -1,0 +1,39 @@
+---
+# clang-tidy for engine_demo. Hard-line on bugprone, cert, performance, and modernize;
+# disable a small set of stylistically opinionated checks that produce noise without value.
+Checks: >
+  -*,
+  bugprone-*,
+  cert-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  performance-*,
+  portability-*,
+  readability-*,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-type-vararg,
+  -modernize-use-trailing-return-type,
+  -readability-magic-numbers,
+  -readability-identifier-length
+
+WarningsAsErrors: >
+  bugprone-*,
+  cert-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  performance-*,
+  portability-*,
+  readability-*
+
+HeaderFilterRegex: '^.*/engine_demo/.*\.h(pp)?$'
+
+CheckOptions:
+  - { key: readability-identifier-naming.ClassCase,      value: lower_case }
+  - { key: readability-identifier-naming.StructCase,     value: lower_case }
+  - { key: readability-identifier-naming.EnumCase,       value: lower_case }
+  - { key: readability-identifier-naming.NamespaceCase,  value: lower_case }
+  - { key: readability-identifier-naming.FunctionCase,   value: lower_case }
+  - { key: readability-identifier-naming.VariableCase,   value: lower_case }
+  - { key: readability-identifier-naming.MemberPrefix,   value: m_ }
+  - { key: readability-identifier-naming.ConstantCase,   value: CamelCase }
+  - { key: readability-identifier-naming.ConstantPrefix, value: k }

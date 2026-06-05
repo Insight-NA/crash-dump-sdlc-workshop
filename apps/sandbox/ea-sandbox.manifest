@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <assemblyIdentity
+    name="ea-sandbox"
+    processorArchitecture="amd64"
+    version="1.0.0.0"
+    type="win32"/>
+  <description>engine_demo sandbox showcase</description>
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
+    <security>
+      <requestedPrivileges>
+        <requestedExecutionLevel level="asInvoker" uiAccess="false"/>
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <!-- Declare Per-Monitor v2 DPI awareness.
+       Without this Windows virtualizes the process at 96 DPI and places a GDI
+       bitmap over the client area, hiding the OpenGL surface underneath.
+       permonitorv2 tells Windows this process handles DPI changes itself, so
+       the raw GL surface is presented directly with no virtualization layer. -->
+  <application xmlns="urn:schemas-microsoft-com:asm.v3">
+    <windowsSettings>
+      <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">
+        PerMonitorV2 PerMonitor
+      </dpiAwareness>
+    </windowsSettings>
+  </application>
+</assembly>

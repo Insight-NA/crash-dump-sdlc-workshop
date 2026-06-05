@@ -1,0 +1,18 @@
+{
+  "servers": {
+    "crash-dump-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["tsx", "tools/crash-dump-mcp/src/index.ts"],
+      "env": {
+        "CDB_PATH": "${input:cdbPath:Path to cdb.exe (Windows Debugging Tools)}",
+        "DEBUG_CDB": ""
+      }
+    },
+    "worktree-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["tsx", "tools/worktree-mcp/src/index.ts"]
+    }
+  }
+}

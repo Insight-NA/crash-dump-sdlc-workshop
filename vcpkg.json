@@ -1,0 +1,16 @@
+{
+  "name": "engine-demo",
+  "version-string": "0.1.0",
+  "description": "EA x Insight Copilot Workshop demo workspace",
+  "builtin-baseline": "dc8d75cfc3281b8e2a4ed8ee4163c891190df932",
+  "dependencies": [
+    "eastl",
+    {
+      "name": "gtest",
+      "version>=": "1.14.0"
+    },
+    "fmt",
+    "nlohmann-json",
+    "raylib"
+  ]
+}

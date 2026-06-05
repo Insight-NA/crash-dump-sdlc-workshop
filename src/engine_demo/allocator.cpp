@@ -1,7 +1,4 @@
 // Implementation of engine_demo::allocator. Bump-pointer arena over a caller-provided buffer.
-//
-// FIX BUG-001 (Session 02): bounds check now uses the post-alignment offset so that
-// alignment padding is correctly accounted for before approving the allocation.
 
 #include "engine_demo/allocator.h"
 
@@ -52,18 +49,13 @@ void* allocator::allocate(std::size_t n, std::size_t alignment) noexcept {
     if ((alignment & (alignment - 1)) != 0)
         return nullptr;  // not a power of two
 
-    // Align the *absolute* pointer address, not just the offset within the buffer.
-    // Using the offset alone only works when m_buffer itself is maximally aligned.
-    const auto base = reinterpret_cast<std::uintptr_t>(m_buffer);
-    const std::size_t aligned_start =
-        static_cast<std::size_t>(align_up(base + m_offset, alignment) - base);
-
-    if (aligned_start + n > m_capacity) {
+    if (m_offset + n > m_capacity) {
         return nullptr;
     }
-    std::byte* aligned_pointer = m_buffer + aligned_start;
-    m_offset = aligned_start + n;
-    return aligned_pointer;
+    m_offset = align_up(m_offset, alignment);
+    std::byte* ptr = m_buffer + m_offset;
+    m_offset += n;
+    return ptr;
 }
 
 void* allocator::allocate(std::size_t n, std::size_t alignment, std::size_t /*offset*/) noexcept {

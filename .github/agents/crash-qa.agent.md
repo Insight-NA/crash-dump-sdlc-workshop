@@ -24,6 +24,8 @@ in one or more worktrees.
 
 Reference: `#file:.github/prompts/regression-test-generation.prompt.md`
 
+If that file cannot be read, generate a regression test that: (1) directly reproduces the crash input/state from the bug report, (2) asserts the process does not crash or exit abnormally, and (3) is placed in `tests/regression/<BUG-ID>/`.
+
 ## Allowed actions
 
 - Run tests in worktrees via `worktree-mcp` (run_tests)
@@ -36,7 +38,8 @@ Reference: `#file:.github/prompts/regression-test-generation.prompt.md`
 - Never modify production source code (only test files)
 - Never delete or skip existing tests
 - Never approve a fix without running the FULL test suite
-- Never proceed without all branches being tested
+- Never proceed without ALL available branches being tested; if fewer than 3 branches exist, rank only the branches that are present and note in the Comparison section how many were tested — do not block verdict generation due to branch count mismatch
+- If the test runner fails to execute (non-test error, environment failure, or missing dependency), record the error output in the QA verdict under a new section "Execution Errors", set the verdict to FAIL with reason "Test suite could not be executed", and do NOT attempt to fix the environment
 
 ## Hand-off
 
@@ -50,8 +53,8 @@ QA verdict MUST contain:
 1. **Test matrix**: full suite results — total/pass/fail
 2. **Regression test**: new test specifically targeting the crash scenario
 3. **Regression result**: does the new test pass with the fix AND fail without it?
-4. **Verdict**: PASS / FAIL / CONDITIONAL (with explanation)
-5. **Comparison**: rank the 3 branches by test health
+4. **Verdict**: PASS / FAIL / CONDITIONAL (with explanation). Use CONDITIONAL when: all existing tests pass but the regression test could not be verified to fail on the pre-fix commit, OR when one or more pre-existing tests were broken by the fix but the fix author has documented an acceptable reason. Use FAIL for all other failure conditions.
+5. **Comparison**: rank all tested branches by test health (list however many branches were tested; note if fewer than 3 exist)
 
 ## Self-test
 
@@ -59,6 +62,12 @@ Before producing verdicts:
 
 - [ ] Full test suite run on ALL worktree branches (not just targeted tests)
 - [ ] At least one new regression test per bug exists
-- [ ] Regression test verified to fail on base branch (proves it catches the bug)
+- [ ] Regression test verified to fail when run against the pre-fix commit of the same worktree (i.e., before the crash-engineer's changes were applied), proving the test catches the bug
 - [ ] No pre-existing test was broken by the fix (or documented if it was)
 - [ ] Verdicts use only: PASS, FAIL, CONDITIONAL
+
+**Checklist-to-verdict mapping:**
+
+- If checklist items 1, 2, or 3 are not satisfied, the verdict for that branch MUST be FAIL.
+- If checklist item 4 is not satisfied but the breakage is documented (and the fix author has provided an acceptable reason), the verdict MAY be CONDITIONAL.
+- Checklist item 5 is a formatting constraint, not a pass/fail criterion.

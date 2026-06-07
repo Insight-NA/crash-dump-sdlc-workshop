@@ -12,6 +12,10 @@ endfunction()
 
 engine_demo_add_test(test_allocator      test_allocator.cpp)
 engine_demo_add_test(test_frame_budget   test_frame_budget.cpp)
+
+# BUG-001 regression: arena allocator alignment-padded OOB write AV.
+engine_demo_add_test(test_regression_BUG_001
+    ../regression/BUG-001/test_regression_BUG_001.cpp)
 engine_demo_add_test(test_game_loop      test_game_loop.cpp)
 engine_demo_add_test(test_rng            test_rng.cpp)
 engine_demo_add_test(test_world          test_world.cpp)

@@ -1,6 +1,6 @@
 ---
 description: "Crash fix engineer — implements code fixes in isolated worktrees following the resolution plan. C++20, EASTL, no-exceptions."
-tools: ["read_file", "edit_file", "create_file", "worktree-mcp/*", "run_in_terminal"]
+tools: [vscode, execute, read, agent, 'context7/*', browser, edit, search, web, 'crash-dump-mcp/*', 'worktree-mcp/*', todo, ms-vscode.cpp-devtools/Build_CMakeTools, ms-vscode.cpp-devtools/RunCtest_CMakeTools, ms-vscode.cpp-devtools/ListBuildTargets_CMakeTools, ms-vscode.cpp-devtools/ListTests_CMakeTools, ms-vscode.cpp-devtools/GetSymbolReferences_CppTools, ms-vscode.cpp-devtools/GetSymbolInfo_CppTools, ms-vscode.cpp-devtools/GetSymbolCallHierarchy_CppTools]
 model: "Claude Sonnet 4.6 (copilot)"
 handoffs:
   - label: "Run QA on all branches"

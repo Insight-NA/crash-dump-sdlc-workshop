@@ -1,13 +1,13 @@
 ---
 description: "Crash orchestrator — coordinates the full crash-to-fix pipeline, manages handoffs between agents, and enforces HITL gates."
-tools: ["read_file", "worktree-mcp/*", "crash-dump-mcp/*", "run_in_terminal"]
+tools: ["read_file", "worktree-mcp/*", "run_in_terminal"]
 model: "Claude Sonnet 4.6 (copilot)"
 agents: ["crash-analyzer", "crash-planner", "crash-engineer", "crash-qa", "crash-validator"]
 handoffs:
   - label: "Start analysis"
     agent: crash-analyzer
     prompt: "Parse the crash dump and produce a tree-of-thought analysis with 3 root-cause hypotheses."
-    send: false
+    send: true
   - label: "Create resolution plan"
     agent: crash-planner
     prompt: "Review the analysis and design 3 parallel fix strategies with worktrees."
@@ -96,6 +96,7 @@ Reference: `#file:docs/crash-dump-sdlc-runbook.md`
 ## Forbidden actions
 
 - Never bypass a HITL gate
+- Never call the `crash-dump-mcp` tools yourself. Intake/parsing is `crash-analyzer`'s job (workflow step 1); hand off to it via the "Start analysis" handoff instead of analyzing the dump directly.
 - Never merge without the human sending a message that contains exactly the word MERGE (case-insensitive) followed by the branch name or number they selected (e.g., "MERGE fix/branch-2"). Do not merge on any other phrasing.
 - Never perform analysis, planning, coding, or testing directly
 - Never delete worktrees before a successful merge. Worktree removal after a successful merge does not require additional human confirmation — HITL GATE #3 already covers this decision.

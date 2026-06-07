@@ -31,7 +31,7 @@ docs/crash-reports/
 
 ## HITL gate format
 
-Every HITL gate MUST use this exact markdown structure so it is visually distinct:
+Every HITL gate MUST use this exact markdown structure so it is visually distinct, and MUST be advanced by clicking a handoff button — never by asking the human to type a command:
 
 ```markdown
 ---
@@ -40,15 +40,22 @@ Every HITL gate MUST use this exact markdown structure so it is visually distinc
 
 **Context**: <one sentence about what was just completed>
 
-**Options**:
-1. ✅ **APPROVE** — proceed to next phase
-2. ❌ **REJECT** — provide feedback for revision
-3. 🔄 **REVISE** — specific changes requested (list below)
+**Objective**: <the single decision the human is being asked to make>
 
-**Awaiting response before proceeding.**
+**Requirements**: <what the human should review above before deciding>
+
+**Expectations**: Use the handoff buttons below — no typing required.
+
+▶ ✅ **Approve / proceed** — advances to the next agent
+▶ 🔄 **Revise** — sends feedback back for changes
+▶ ❌ **Reject** — stops or closes this path
+
+**The buttons ARE the gate; clicking one pre-fills the required token. Awaiting the human's selection before proceeding.**
 
 ---
 ```
+
+The exact button labels are defined in each agent's `handoffs` frontmatter. Never write "type APPROVE", "say create worktrees", or "say implement" — always point the human at the button.
 
 ## Artifact lifecycle
 

@@ -69,13 +69,16 @@ Write to `docs/crash-reports/$BUG_ID-resolution.md`:
 
 **Context**: Analysis complete, fixes implemented and tested, recommendation ready.
 
-**Options**:
-1. ✅ **MERGE Branch X** — apply recommended fix to main
-2. ✅ **MERGE Branch Y** — override recommendation with alternate branch
-3. ❌ **REJECT ALL** — none of the fixes are acceptable
-4. 🔄 **REVISE** — request changes to a specific branch
+**Objective**: Choose how to resolve $BUG_ID.
 
-**Awaiting response before proceeding.**
+**Requirements**: Review the branch comparison and recommendation above.
+
+**Expectations**: Use the handoff buttons below — no typing required (edit `<branch>` on the merge button to override the recommendation):
+1. ✅ **Merge Approved Branch** — apply the selected fix to main
+2. 🔄 **Reject All — Request Revisions** — send feedback back to crash-engineer
+3. ❌ **Reject All & Close** — abandon all branches and close the report
+
+**The three buttons ARE the gate — clicking one pre-fills the required token. Awaiting the human's selection before proceeding.**
 
 ---
 ```

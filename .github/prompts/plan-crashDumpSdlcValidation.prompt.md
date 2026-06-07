@@ -112,16 +112,15 @@ each with file+line citations and confidence levels (at least one "high").
 ### Step 3 — HITL Gate #1: Human Reviews Analysis
 **Expected gate format:**
 ```
-### ⏸️ HUMAN IN THE LOOP — Decision Required
+### ⏸️ HITL Gate #1 — Crash Analysis Review
 Context: Tree-of-thought analysis complete. 3 hypotheses generated.
-Options:
-1. ✅ APPROVE — proceed to planning with all 3 hypotheses
-2. ❌ REJECT — analysis is fundamentally wrong
-3. 🔄 REVISE — adjust specific hypotheses
-Awaiting response.
+Objective: Approve converting the hypotheses into a 3-branch fix plan.
+Requirements: Review the 3 hypotheses and confidence levels.
+Expectations: Use the buttons below — no typing required.
+▶ ✅ Approve Analysis → Plan Fixes   ▶ ↩ Back to Orchestrator
 ```
-**Response:** Type `APPROVE`
-✅ Validate: Gate renders with all 3 options; APPROVE proceeds to Step 4.
+**Response:** Click **✅ Approve Analysis → Plan Fixes**
+✅ Validate: Gate renders the handoff buttons; clicking Approve advances to crash-planner (Step 4) with no typed command.
 
 ### Step 4 — Planning: Design 3 Fix Strategies
 **Agent:** `crash-planner` (delegated by orchestrator)
@@ -138,8 +137,8 @@ Awaiting response.
 | `fix/BUG-001-c` | `type-fix` | Change capacity to account for max alignment overhead |
 
 ### Step 5 — HITL Gate #2: Human Approves Plan
-**Response:** Type `APPROVE`
-✅ Validate: Gate records APPROVE decision; orchestrator delegates to crash-engineer.
+**Response:** Click **✅ Approve Plan & Create Worktrees**
+✅ Validate: Button click registers approval, planner creates the 3 worktrees, then surfaces **🛠 Implement All 3 Branches** to delegate to crash-engineer — no typed command.
 
 ### Step 6 — Implementation: Fix in Parallel Worktrees
 **Agent:** `crash-engineer` (delegated by orchestrator, runs per branch)
@@ -178,8 +177,8 @@ m_offset = aligned + n;
 - Recommendation: Branch B
 
 ### Step 9 — HITL Gate #3: Human Selects Branch
-**Response:** Type `MERGE Branch B`
-✅ Validate: Gate records selection; orchestrator proceeds to merge.
+**Response:** Click **✅ Merge Approved Branch** (edit `<branch>` to override the recommendation)
+✅ Validate: Button pre-fills `MERGE <branch>`; orchestrator proceeds to merge — no typed command.
 
 ### Step 10 — Merge + Cleanup
 **Agent:** `crash-orchestrator`

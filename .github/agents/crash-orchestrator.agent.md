@@ -1,28 +1,48 @@
 ---
 description: "Crash orchestrator — coordinates the full crash-to-fix pipeline, manages handoffs between agents, and enforces HITL gates."
-tools: ["read_file", "worktree-mcp/*", "run_in_terminal"]
+tools: [vscode, execute, read, agent, com.microsoft/azure/search, browser, edit, search, web, azure-mcp/search, 'worktree-mcp/*', todo]
 model: "Claude Sonnet 4.6 (copilot)"
 agents: ["crash-analyzer", "crash-planner", "crash-engineer", "crash-qa", "crash-validator"]
 handoffs:
-  - label: "Start analysis"
+  - label: "▶ Start Analysis"
     agent: crash-analyzer
-    prompt: "Parse the crash dump and produce a tree-of-thought analysis with 3 root-cause hypotheses."
+    prompt: |
+      Context: A new crash dump for <BUG-ID> has arrived and the pipeline is at INTAKE.
+      Objective: Parse the dump and produce a tree-of-thought analysis with exactly 3 ranked root-cause hypotheses.
+      Requirements: Use crash-dump-mcp tools; annotate every faulting-thread frame to source; honor docs/crash-reports naming.
+      Expectations: docs/crash-reports/<BUG-ID>-analysis.md written, ending with the HITL Gate #1 button block.
     send: true
-  - label: "Create resolution plan"
+  - label: "🧭 Create Resolution Plan"
     agent: crash-planner
-    prompt: "Review the analysis and design 3 parallel fix strategies with worktrees."
+    prompt: |
+      Context: Analysis for <BUG-ID> is approved at HITL Gate #1; 3 hypotheses are in docs/crash-reports/<BUG-ID>-analysis.md.
+      Objective: Design 3 parallel fix strategies, one per hypothesis.
+      Requirements: Exactly 3 branches, each addressing a distinct hypothesis; honor specs/constitution.md; do not create worktrees until the plan is approved.
+      Expectations: docs/crash-reports/<BUG-ID>-plan.md written, ending with the HITL Gate #2 button block.
     send: false
-  - label: "Implement fixes"
+  - label: "🛠 Implement Fixes"
     agent: crash-engineer
-    prompt: "Implement the approved resolution plan in all 3 worktree branches."
+    prompt: |
+      Context: The resolution plan for <BUG-ID> is approved at HITL Gate #2 and 3 worktrees exist.
+      Objective: Implement the approved fix strategy in all 3 worktree branches.
+      Requirements: Stay within each assigned worktree; honor specs/constitution.md (EASTL, no exceptions, no RTTI, allocator-aware); every change compiles.
+      Expectations: docs/crash-reports/<BUG-ID>-impl-<branch>.md per branch, then handoff to crash-qa.
     send: false
-  - label: "Run QA validation"
+  - label: "🧪 Run QA Validation"
     agent: crash-qa
-    prompt: "Run the full test suite on all worktree branches and generate regression tests."
+    prompt: |
+      Context: Implementation for <BUG-ID> is complete across the worktree branches.
+      Objective: Run the full test suite on all branches and generate a regression test for the crash.
+      Requirements: Full suite per branch; regression test fails pre-fix and passes with the fix; do not modify production source.
+      Expectations: docs/crash-reports/<BUG-ID>-qa-<branch>.md per branch with PASS/FAIL/CONDITIONAL verdicts, then handoff to crash-validator.
     send: false
-  - label: "Present for final approval"
+  - label: "📋 Present for Final Approval"
     agent: crash-validator
-    prompt: "Synthesize all results and present the resolution brief for human decision."
+    prompt: |
+      Context: QA verdicts for <BUG-ID> are complete for all branches.
+      Objective: Synthesize all results into a resolution brief and present HITL Gate #3.
+      Requirements: Recommend only a PASS/justified-CONDITIONAL branch; keep the brief under 200 lines.
+      Expectations: docs/crash-reports/<BUG-ID>-resolution.md written, ending with the MERGE / REVISE / REJECT button gate.
     send: false
 ---
 
@@ -97,7 +117,7 @@ Reference: `#file:docs/crash-dump-sdlc-runbook.md`
 
 - Never bypass a HITL gate
 - Never call the `crash-dump-mcp` tools yourself. Intake/parsing is `crash-analyzer`'s job (workflow step 1); hand off to it via the "Start analysis" handoff instead of analyzing the dump directly.
-- Never merge without the human sending a message that contains exactly the word MERGE (case-insensitive) followed by the branch name or number they selected (e.g., "MERGE fix/branch-2"). Do not merge on any other phrasing.
+- Never merge without the human authorizing it at HITL Gate #3. Authorization is the human clicking the **✅ Merge Approved Branch** button in crash-validator's brief, whose pre-filled prompt carries the literal `MERGE <branch>` token (case-insensitive) naming the selected branch (e.g., "MERGE fix/branch-2"). Do not merge on any other phrasing, and never ask the human to type the command — the button is the gate.
 - Never perform analysis, planning, coding, or testing directly
 - Never delete worktrees before a successful merge. Worktree removal after a successful merge does not require additional human confirmation — HITL GATE #3 already covers this decision.
 - Never force-push or rewrite history

@@ -1,11 +1,23 @@
 ---
 description: "Crash QA agent — validates fixes by running full test suite, checking for regressions, and generating regression tests."
-tools: ["read_file", "worktree-mcp/*", "create_file", "edit_file", "run_in_terminal"]
+tools: [vscode, execute, read, agent, browser, edit, search, web, 'worktree-mcp/*', todo]
 model: "Claude Sonnet 4.6 (copilot)"
 handoffs:
-  - label: "Present validation results"
+  - label: "📋 Present Validation Results"
     agent: crash-validator
-    prompt: "QA is complete for all branches. Synthesize results and present the resolution brief for human decision."
+    prompt: |
+      Context: QA is complete for all branches of <BUG-ID>; per-branch verdicts are in docs/crash-reports/<BUG-ID>-qa-<branch>.md.
+      Objective: Synthesize analysis, implementation, and QA results into a resolution brief and present the final HITL gate.
+      Requirements: Read all artifacts; recommend only a branch with a PASS (or justified CONDITIONAL) verdict; if zero branches pass, hand back to crash-engineer; keep the brief under 200 lines.
+      Expectations: Write docs/crash-reports/<BUG-ID>-resolution.md (Executive summary, Branch comparison, Recommended branch, Diff preview, Regression confirmation) ending with the MERGE / REVISE / REJECT button gate.
+    send: false
+  - label: "↩ Back to Orchestrator"
+    agent: crash-orchestrator
+    prompt: |
+      Context: QA verdicts for <BUG-ID> are recorded in docs/crash-reports/<BUG-ID>-qa-<branch>.md; the human wants the orchestrator to drive the next step instead of advancing directly to validation.
+      Objective: Resume pipeline coordination from the QA stage.
+      Requirements: Do not test or fix directly; if fewer than the expected branches pass, apply the partial-QA-results rule before proceeding.
+      Expectations: Summarize the QA verdicts across branches and surface the forward handoff to crash-validator.
     send: false
 ---
 

@@ -3,9 +3,21 @@ description: "Crash fix engineer — implements code fixes in isolated worktrees
 tools: [vscode, execute, read, agent, 'context7/*', browser, edit, search, web, 'crash-dump-mcp/*', 'worktree-mcp/*', todo, ms-vscode.cpp-devtools/Build_CMakeTools, ms-vscode.cpp-devtools/RunCtest_CMakeTools, ms-vscode.cpp-devtools/ListBuildTargets_CMakeTools, ms-vscode.cpp-devtools/ListTests_CMakeTools, ms-vscode.cpp-devtools/GetSymbolReferences_CppTools, ms-vscode.cpp-devtools/GetSymbolInfo_CppTools, ms-vscode.cpp-devtools/GetSymbolCallHierarchy_CppTools]
 model: "Claude Sonnet 4.6 (copilot)"
 handoffs:
-  - label: "Run QA on all branches"
+  - label: "🧪 Run QA on all branches"
     agent: crash-qa
-    prompt: "Implementation is complete in all worktree branches. Run the full test suite and generate regression tests."
+    prompt: |
+      Context: Implementation for <BUG-ID> is complete in all worktree branches; per-branch notes are in docs/crash-reports/<BUG-ID>-impl-<branch>.md.
+      Objective: Validate every branch by running the full test suite and generating a regression test that targets the crash.
+      Requirements: Run the FULL suite on all available worktree branches via worktree-mcp run_tests; the regression test must fail on the pre-fix commit and pass with the fix; do not modify production source.
+      Expectations: Write docs/crash-reports/<BUG-ID>-qa-<branch>.md per branch (Test matrix, Regression test + result, Verdict PASS/FAIL/CONDITIONAL, Comparison), then present the "Present Validation Results" handoff.
+    send: false
+  - label: "↩ Back to Orchestrator"
+    agent: crash-orchestrator
+    prompt: |
+      Context: Implementation for <BUG-ID> is complete (or blocked) in the worktree branches; the human wants the orchestrator to drive the next step instead of advancing directly to QA.
+      Objective: Resume pipeline coordination from the implementation stage.
+      Requirements: Do not analyze, plan, code, or test directly; verify each impl note exists and reports build status before proceeding; if a branch is blocked, route per the error-routing table.
+      Expectations: Summarize implementation status across branches and surface the forward handoff to crash-qa.
     send: false
 ---
 

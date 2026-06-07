@@ -3,9 +3,21 @@ description: "Crash dump analysis agent — parses .dmp files, extracts call sta
 tools: ["crash-dump-mcp/*", "read_file", "semantic_search", "grep_search"]
 model: "Claude Sonnet 4.6 (copilot)"
 handoffs:
-  - label: "Review Analysis (HITL Gate #1)"
+  - label: "✅ Approve Analysis → Plan Fixes (HITL Gate #1)"
+    agent: crash-planner
+    prompt: |
+      Context: Crash analysis for <BUG-ID> is complete in docs/crash-reports/<BUG-ID>-analysis.md, with exactly 3 ranked root-cause hypotheses. The human has reviewed and APPROVED the analysis at HITL Gate #1 by clicking this button.
+      Objective: Convert the 3 approved hypotheses into a parallel resolution plan with one fix branch per hypothesis.
+      Requirements: Read the analysis report first; produce exactly 3 branches (one per distinct hypothesis); honor specs/constitution.md (EASTL, no exceptions, no RTTI, allocator-aware); do NOT create worktrees yet — wait for the Approve Plan gate.
+      Expectations: Write docs/crash-reports/<BUG-ID>-plan.md (Summary, Branch table, Acceptance criteria, Risk assessment) ending with the HITL Gate #2 "Awaiting human approval" marker and the Approve Plan handoff button.
+    send: false
+  - label: "↩ Back to Orchestrator"
     agent: crash-orchestrator
-    prompt: "The crash analysis is complete. Present HITL Gate #1 for human review of the 3 hypotheses."
+    prompt: |
+      Context: Crash analysis for <BUG-ID> is complete in docs/crash-reports/<BUG-ID>-analysis.md with 3 ranked hypotheses; the human wants the orchestrator to drive the next step instead of advancing directly.
+      Objective: Resume pipeline coordination from the analysis stage and present HITL Gate #1.
+      Requirements: Do not analyze, plan, or code directly; verify the analysis artifact meets acceptance criteria (3 hypotheses + tree-of-thought) before proceeding.
+      Expectations: Present HITL Gate #1 with the analyzer's hypotheses and the forward handoff to crash-planner.
     send: false
 ---
 
@@ -61,6 +73,24 @@ The analysis report MUST contain:
 3. **Tree-of-thought**: exactly 3 hypotheses with confidence (high/medium/low)
 4. **Evidence**: memory dumps, register state, relevant code snippets
 5. **Recommended investigation**: what the planner should validate next
+
+## Presenting HITL Gate #1
+
+End every completed analysis with this gate block, then stop and wait:
+
+```
+### ⏸️ HITL Gate #1 — Crash Analysis Review
+
+Context: Tree-of-thought analysis complete for <BUG-ID>; 3 ranked hypotheses recorded in docs/crash-reports/<BUG-ID>-analysis.md.
+Objective: Get human approval to convert the hypotheses into a 3-branch fix plan.
+Requirements: Review the 3 hypotheses and their confidence levels below.
+Expectations: Use the buttons below to decide — no typing required.
+
+▶ Click **✅ Approve Analysis → Plan Fixes** to advance to crash-planner.
+▶ Click **↩ Back to Orchestrator** to let the orchestrator drive the next step.
+```
+
+Never instruct the human to type a command (e.g., "type APPROVE"). The handoff buttons ARE the gate — clicking one pre-fills and submits the next step. If the human wants changes instead, they will reply in chat and you re-run the analysis with their feedback.
 
 ## Self-test
 

@@ -1,12 +1,11 @@
 function(engine_demo_add_test test_name)
-    add_executable(${test_name} ${ARGN})
+    add_executable(${test_name} ${ARGN} ${CMAKE_CURRENT_SOURCE_DIR}/test_main.cpp)
     target_link_libraries(${test_name} PRIVATE
         engine_demo
         GTest::gtest
-        GTest::gtest_main
         GTest::gmock
     )
-    engine_demo_set_target_options(${test_name})
+    engine_demo_set_test_target_options(${test_name})
     add_test(NAME ${test_name} COMMAND ${test_name})
 endfunction()
 

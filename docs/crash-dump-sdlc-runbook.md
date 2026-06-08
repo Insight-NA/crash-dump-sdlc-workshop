@@ -73,10 +73,10 @@ cd tools/worktree-mcp && npm install && cd ../..
 
 **Mode**: `crash-orchestrator`
 
-**Your action**: Review the 3 hypotheses. Ask questions. Then respond:
-- ✅ **APPROVE** — hypotheses are reasonable, proceed to planning
-- ❌ **REJECT** — analysis is wrong, provide correction
-- 🔄 **REVISE** — adjust a specific hypothesis
+**Your action**: Review the 3 hypotheses. Ask questions. Then use the buttons in the gate block — no typing required:
+- ✅ **Approve** — click **✅ Approve Analysis → Plan Fixes (HITL Gate #1)** to proceed to planning
+- ❌ **Reject** — click **▶ Start Analysis** to discard and re-run the analysis
+- 🔄 **Revise** — reply in chat with the hypothesis to adjust
 
 ---
 
@@ -103,7 +103,9 @@ cd tools/worktree-mcp && npm install && cd ../..
 - File modifications are reasonable
 - Risk assessment makes sense
 
-Respond: APPROVE / REJECT / REVISE
+Then use the buttons in the gate block — no typing required:
+- ✅ **Approve** — click **✅ Approve Plan → Create Worktrees & Implement (HITL Gate #2)** to proceed to implementation
+- ❌ **Reject** / 🔄 **Revise** — reply in chat with the change
 
 ---
 

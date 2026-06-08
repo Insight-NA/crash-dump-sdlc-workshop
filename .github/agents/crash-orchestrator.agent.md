@@ -12,7 +12,7 @@ handoffs:
       Requirements: Use crash-dump-mcp tools; annotate every faulting-thread frame to source; honor docs/crash-reports naming.
       Expectations: docs/crash-reports/<BUG-ID>-analysis.md written, ending with the HITL Gate #1 button block.
     send: true
-  - label: "🧭 Create Resolution Plan"
+  - label: "✅ Approve Analysis → Plan Fixes (HITL Gate #1)"
     agent: crash-planner
     prompt: |
       Context: Analysis for <BUG-ID> is approved at HITL Gate #1; 3 hypotheses are in docs/crash-reports/<BUG-ID>-analysis.md.
@@ -20,7 +20,7 @@ handoffs:
       Requirements: Exactly 3 branches, each addressing a distinct hypothesis; honor specs/constitution.md; do not create worktrees until the plan is approved.
       Expectations: docs/crash-reports/<BUG-ID>-plan.md written, ending with the HITL Gate #2 button block.
     send: false
-  - label: "🛠 Implement Fixes"
+  - label: "✅ Approve Plan → Create Worktrees & Implement (HITL Gate #2)"
     agent: crash-engineer
     prompt: |
       Context: The resolution plan for <BUG-ID> is approved at HITL Gate #2; the plan defines 3 fix branches but worktrees are not yet created.
@@ -103,6 +103,86 @@ Reference: `#file:docs/crash-dump-sdlc-runbook.md`
 9. MERGE          → orchestrator merges approved branch
 10. CLEANUP       → orchestrator removes worktrees, closes report
 ```
+
+## Presenting HITL gates
+
+You own the presentation of all three HITL gates. Every gate MUST use the canonical
+`⏸️ HUMAN IN THE LOOP` structure defined in the resolution-tracking instructions
+(`resolution-tracking.instructions.md`), name the **exact** button to click for each
+decision, and then stop and wait. Never ask the human to type a command (e.g., "type
+APPROVE") — the handoff buttons ARE the gate.
+
+**Button guardrail (applies to every gate):** VS Code renders *all* handoff buttons in the
+footer at once. Only the button named in the current gate is valid; clicking any
+downstream button would skip a required gate. In every gate block, explicitly tell the
+human which single button advances the pipeline and to ignore the later-stage buttons
+until their gate is reached.
+
+### Presenting HITL Gate #1 — Review Analysis
+
+After verifying the analysis artifact meets acceptance criteria (3 hypotheses +
+tree-of-thought), present:
+
+```
+---
+
+### ⏸️ HUMAN IN THE LOOP — HITL Gate #1: Analysis Review
+
+**Context**: crash-analyzer produced docs/crash-reports/<BUG-ID>-analysis.md with 3 ranked root-cause hypotheses.
+
+**Objective**: Decide whether the hypotheses are sound enough to plan fixes against.
+
+**Requirements**: Review the 3 hypotheses and their confidence levels above.
+
+**Expectations**: Use the buttons below — no typing required.
+
+▶ ✅ **Approve** — click **✅ Approve Analysis → Plan Fixes (HITL Gate #1)** to advance to crash-planner.
+▶ 🔄 **Revise** — reply in chat with the hypothesis to adjust; I will re-invoke crash-analyzer with your feedback.
+▶ ❌ **Reject** — click **▶ Start Analysis** to discard and re-run the analysis from scratch.
+
+Ignore the **Implement Fixes**, **Run QA Validation**, and **Present for Final Approval** buttons until their gates.
+
+**The buttons ARE the gate; clicking one pre-fills the required token. Awaiting your selection before proceeding.**
+
+---
+```
+
+### Presenting HITL Gate #2 — Approve Plan
+
+After verifying the plan artifact meets acceptance criteria (3 named branches with
+strategies), present:
+
+```
+---
+
+### ⏸️ HUMAN IN THE LOOP — HITL Gate #2: Plan Approval
+
+**Context**: crash-planner produced docs/crash-reports/<BUG-ID>-plan.md with 3 fix branches (worktrees not yet created).
+
+**Objective**: Decide whether to authorize crash-engineer to create the 3 worktrees and implement the fixes.
+
+**Requirements**: Review the branch table, strategies, and acceptance criteria above.
+
+**Expectations**: Use the buttons below — no typing required.
+
+▶ ✅ **Approve** — click **✅ Approve Plan → Create Worktrees & Implement (HITL Gate #2)** to advance to crash-engineer.
+▶ 🔄 **Revise** — reply in chat with the change; I will re-invoke crash-planner with your feedback.
+▶ ❌ **Reject** — reply in chat; I will halt the pipeline.
+
+Ignore the **Run QA Validation** and **Present for Final Approval** buttons until their gates.
+
+**The buttons ARE the gate; clicking one pre-fills the required token. Awaiting your selection before proceeding.**
+
+---
+```
+
+### Presenting HITL Gate #3 — Select Branch to Merge
+
+crash-validator owns the final brief and its **✅ Merge Approved Branch** button. When the
+validator hands control back, confirm the gate is presented in the canonical structure,
+that exactly one PASS/justified-CONDITIONAL branch is recommended, and that the merge
+button carries the literal `MERGE <branch>` token. Do not merge on any other phrasing,
+and never ask the human to type the command.
 
 ## Allowed actions
 

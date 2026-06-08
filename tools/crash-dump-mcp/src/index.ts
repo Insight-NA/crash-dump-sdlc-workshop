@@ -30,6 +30,29 @@ const server = new McpServer({
 // Shared CDB session (one dump at a time)
 let cdb: CdbRunner | null = null;
 
+type ToolResult = { content: Array<{ type: "text"; text: string }>; isError?: boolean };
+
+/**
+ * Wrap a tool handler so any thrown error (e.g. a cdb command timeout) is
+ * returned as a structured MCP error result instead of rejecting and leaving
+ * the calling agent waiting indefinitely.
+ */
+function withErrors<A>(
+  fn: (args: A) => Promise<ToolResult>
+): (args: A) => Promise<ToolResult> {
+  return async (args: A) => {
+    try {
+      return await fn(args);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      return {
+        isError: true,
+        content: [{ type: "text", text: JSON.stringify({ error: message }, null, 2) }],
+      };
+    }
+  };
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Tool: parse_minidump
 // ─────────────────────────────────────────────────────────────────────────────
@@ -40,7 +63,7 @@ server.tool(
     dumpPath: z.string().describe("Absolute path to the .dmp file"),
     pdbPath: z.string().optional().describe("Path to directory containing .pdb symbol files"),
   },
-  async ({ dumpPath, pdbPath }): Promise<{ content: Array<{ type: "text"; text: string }> }> => {
+  withErrors(async ({ dumpPath, pdbPath }): Promise<{ content: Array<{ type: "text"; text: string }> }> => {
     // Close any existing session
     if (cdb) await cdb.close();
     cdb = new CdbRunner();
@@ -73,12 +96,12 @@ server.tool(
     return {
       content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
     };
-  }
+  })
 );
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────
 // Tool: get_call_stack
-// ─────────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────
 server.tool(
   "get_call_stack",
   "Get the call stack for a specific thread in the loaded dump. Returns frames with module, function, source file, and line number.",
@@ -86,7 +109,7 @@ server.tool(
     threadId: z.number().optional().describe("Thread ID to inspect (default: faulting thread)"),
     maxFrames: z.number().optional().default(50).describe("Maximum frames to return"),
   },
-  async ({ threadId, maxFrames }): Promise<{ content: Array<{ type: "text"; text: string }> }> => {
+  withErrors(async ({ threadId, maxFrames }): Promise<{ content: Array<{ type: "text"; text: string }> }> => {
     if (!cdb) throw new Error("No dump loaded. Call parse_minidump first.");
 
     if (threadId !== undefined) {
@@ -99,19 +122,19 @@ server.tool(
     return {
       content: [{ type: "text", text: JSON.stringify(frames, null, 2) }],
     };
-  }
+  })
 );
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────
 // Tool: resolve_symbols
-// ─────────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────
 server.tool(
   "resolve_symbols",
   "Resolve an address to a symbol (function name, source file, line number) using loaded PDB symbols.",
   {
     address: z.string().describe("Virtual address to resolve (hex, e.g. '0x00007ff6abcd1234')"),
   },
-  async ({ address }): Promise<{ content: Array<{ type: "text"; text: string }> }> => {
+  withErrors(async ({ address }): Promise<{ content: Array<{ type: "text"; text: string }> }> => {
     if (!cdb) throw new Error("No dump loaded. Call parse_minidump first.");
 
     const lnOutput = await cdb.execute(`ln ${address}`);
@@ -120,17 +143,17 @@ server.tool(
     return {
       content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
     };
-  }
+  })
 );
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────
 // Tool: analyze_crash
-// ─────────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────
 server.tool(
   "analyze_crash",
   "Run automated crash analysis (equivalent to WinDbg '!analyze -v'). Returns exception details, faulting frame, root cause hypothesis, and call stack.",
   {},
-  async (): Promise<{ content: Array<{ type: "text"; text: string }> }> => {
+  withErrors(async (): Promise<{ content: Array<{ type: "text"; text: string }> }> => {
     if (!cdb) throw new Error("No dump loaded. Call parse_minidump first.");
 
     const raw = await cdb.execute("!analyze -v");
@@ -143,19 +166,19 @@ server.tool(
     return {
       content: [{ type: "text", text: JSON.stringify(analysis, null, 2) }],
     };
-  }
+  })
 );
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────
 // Tool: get_thread_context
-// ─────────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────
 server.tool(
   "get_thread_context",
   "Get register state and thread context for a specific thread.",
   {
     threadId: z.number().describe("Thread ID to inspect"),
   },
-  async ({ threadId }): Promise<{ content: Array<{ type: "text"; text: string }> }> => {
+  withErrors(async ({ threadId }): Promise<{ content: Array<{ type: "text"; text: string }> }> => {
     if (!cdb) throw new Error("No dump loaded. Call parse_minidump first.");
 
     await cdb.execute(`~${threadId}s`);
@@ -177,17 +200,17 @@ server.tool(
     return {
       content: [{ type: "text", text: JSON.stringify(context, null, 2) }],
     };
-  }
+  })
 );
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────
 // Tool: list_modules
-// ─────────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────
 server.tool(
   "list_modules",
   "List all loaded modules (DLLs/executables) with PDB match status. Use to verify symbols are loaded correctly before analysis.",
   {},
-  async (): Promise<{ content: Array<{ type: "text"; text: string }> }> => {
+  withErrors(async (): Promise<{ content: Array<{ type: "text"; text: string }> }> => {
     if (!cdb) throw new Error("No dump loaded. Call parse_minidump first.");
 
     const raw = await cdb.execute("lmv");
@@ -196,12 +219,12 @@ server.tool(
     return {
       content: [{ type: "text", text: JSON.stringify(modules, null, 2) }],
     };
-  }
+  })
 );
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────
 // Tool: get_memory_region
-// ─────────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────
 server.tool(
   "get_memory_region",
   "Read a memory region from the dump at a specific address. Returns hex + ASCII dump. Useful for inspecting heap corruption.",
@@ -209,7 +232,7 @@ server.tool(
     address: z.string().describe("Start address (hex)"),
     size: z.number().optional().default(256).describe("Number of bytes to read"),
   },
-  async ({ address, size }): Promise<{ content: Array<{ type: "text"; text: string }> }> => {
+  withErrors(async ({ address, size }): Promise<{ content: Array<{ type: "text"; text: string }> }> => {
     if (!cdb) throw new Error("No dump loaded. Call parse_minidump first.");
 
     const raw = await cdb.execute(`db ${address} L${size.toString(16)}`);
@@ -225,7 +248,7 @@ server.tool(
     return {
       content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
     };
-  }
+  })
 );
 
 // ─────────────────────────────────────────────────────────────────────────────

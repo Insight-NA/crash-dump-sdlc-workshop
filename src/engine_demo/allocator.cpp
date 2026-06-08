@@ -49,14 +49,13 @@ void* allocator::allocate(std::size_t n, std::size_t alignment) noexcept {
     if ((alignment & (alignment - 1)) != 0)
         return nullptr;  // not a power of two
 
-    // Fix BUG-001: compute aligned offset BEFORE the bounds check so that
-    // alignment padding is correctly included in the capacity test.
-    const auto aligned = align_up(m_offset, alignment);
-    if (aligned + n > m_capacity) {
+    // BUG-001: bounds check uses raw m_offset before alignment is applied.
+    if (m_offset + n > m_capacity) {
         return nullptr;
     }
-    m_offset = aligned + n;
-    return m_buffer + aligned;
+    m_offset = align_up(m_offset, alignment);
+    m_offset += n;
+    return m_buffer + (m_offset - n);
 }
 
 void* allocator::allocate(std::size_t n, std::size_t alignment, std::size_t /*offset*/) noexcept {

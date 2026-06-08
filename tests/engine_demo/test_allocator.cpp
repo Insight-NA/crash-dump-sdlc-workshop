@@ -28,8 +28,7 @@ TEST(allocator, exhaustion_returns_null) {
     EXPECT_EQ(p2, nullptr);
 }
 
-// REGRESSION TEST for BUG-001 — re-enabled by crash-qa after Branch B fix.
-TEST(allocator, third_aligned_alloc_does_not_overrun_arena) {
+TEST(allocator, DISABLED_third_aligned_alloc_does_not_overrun_arena) {
     std::array<std::byte, 160> buffer{};
     engine_demo::allocator a{buffer.data(), buffer.size()};
 

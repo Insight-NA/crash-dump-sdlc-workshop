@@ -15,11 +15,37 @@ import { resolve } from "node:path";
 const CDB_PATH = process.env.CDB_PATH ?? "cdb.exe";
 const SENTINEL = "__MCP_END_SENTINEL__";
 
+// Per-command timeout. A blocked cdb.exe (e.g. a slow/offline symbol-server
+// fetch) used to hang execute() forever; this bounds every command instead.
+const CDB_TIMEOUT_MS = Number(process.env.CDB_TIMEOUT_MS ?? "30000");
+
+/**
+ * Build the cdb symbol path. Defaults to a *cached* downstore against the
+ * Microsoft public symbol server so repeat lookups are fast and a single slow
+ * fetch can't wedge the session. Set CDB_OFFLINE=1 to use only local PDBs
+ * (fully deterministic, no network).
+ */
+function buildSymbolPath(localPdb: string | null): string {
+  const offline = process.env.CDB_OFFLINE === "1" || process.env.CDB_OFFLINE === "true";
+  const downstore =
+    process.env.CDB_SYMBOL_CACHE ??
+    "srv*C:\\symbols*https://msdl.microsoft.com/download/symbols";
+  if (offline) {
+    return localPdb ?? "";
+  }
+  return localPdb ? `${localPdb};${downstore}` : downstore;
+}
+
 export class CdbRunner {
   private process: ChildProcess | null = null;
   private outputBuffer = "";
   private resolveWaiting: ((output: string) => void) | null = null;
+  private rejectWaiting: ((err: Error) => void) | null = null;
+  private commandTimer: ReturnType<typeof setTimeout> | null = null;
   private symbolPath: string | null = null;
+  // Serializes execute() calls so overlapping commands can't clobber the
+  // single resolveWaiting slot (which previously dropped resolvers silently).
+  private queue: Promise<unknown> = Promise.resolve();
 
   /**
    * Open a minidump file for analysis.
@@ -32,10 +58,14 @@ export class CdbRunner {
       stdio: ["pipe", "pipe", "pipe"],
       env: {
         ...process.env,
-        _NT_SYMBOL_PATH: this.symbolPath
-          ? `${this.symbolPath};srv*`
-          : "srv*",
+        _NT_SYMBOL_PATH: buildSymbolPath(this.symbolPath),
       },
+    });
+
+    this.process.on("exit", () => {
+      // If cdb dies mid-command, fail the pending caller instead of hanging.
+      this.settleReject(new Error("cdb.exe exited unexpectedly"));
+      this.process = null;
     });
 
     this.process.stdout?.setEncoding("utf-8");
@@ -44,8 +74,7 @@ export class CdbRunner {
       if (this.outputBuffer.includes(SENTINEL)) {
         const output = this.outputBuffer.split(SENTINEL)[0];
         this.outputBuffer = "";
-        this.resolveWaiting?.(output.trim());
-        this.resolveWaiting = null;
+        this.settleResolve(output.trim());
       }
     });
 
@@ -69,27 +98,76 @@ export class CdbRunner {
 
   /**
    * Execute a single cdb command and return the output.
+   *
+   * Calls are serialized (one in-flight at a time) and bounded by
+   * CDB_TIMEOUT_MS — on timeout the promise rejects rather than hanging.
    */
   async execute(command: string): Promise<string> {
+    const run = this.queue.then(() => this.runCommand(command));
+    // Keep the chain alive regardless of this call's success/failure.
+    this.queue = run.catch(() => undefined);
+    return run;
+  }
+
+  private runCommand(command: string): Promise<string> {
     if (!this.process?.stdin) {
-      throw new Error("CDB process not running. Call open() first.");
+      return Promise.reject(
+        new Error("CDB process not running. Call open() first.")
+      );
     }
 
-    return new Promise((resolve) => {
+    return new Promise<string>((resolve, reject) => {
       this.resolveWaiting = resolve;
+      this.rejectWaiting = reject;
+      this.commandTimer = setTimeout(() => {
+        this.settleReject(
+          new Error(`cdb command timed out after ${CDB_TIMEOUT_MS}ms: ${command}`)
+        );
+      }, CDB_TIMEOUT_MS);
       this.process!.stdin!.write(`${command}\n.echo ${SENTINEL}\n`);
     });
+  }
+
+  /** Resolve the pending command and clear its timer/handlers. */
+  private settleResolve(output: string): void {
+    if (this.commandTimer) {
+      clearTimeout(this.commandTimer);
+      this.commandTimer = null;
+    }
+    const resolve = this.resolveWaiting;
+    this.resolveWaiting = null;
+    this.rejectWaiting = null;
+    resolve?.(output);
+  }
+
+  /** Reject the pending command (timeout / process death) and reset state. */
+  private settleReject(err: Error): void {
+    if (this.commandTimer) {
+      clearTimeout(this.commandTimer);
+      this.commandTimer = null;
+    }
+    const reject = this.rejectWaiting;
+    this.resolveWaiting = null;
+    this.rejectWaiting = null;
+    this.outputBuffer = "";
+    reject?.(err);
   }
 
   /**
    * Close the cdb session.
    */
   async close(): Promise<void> {
+    this.settleReject(new Error("CDB session closed"));
     if (this.process) {
-      this.process.stdin?.write("q\n");
+      try {
+        this.process.stdin?.write("q\n");
+      } catch {
+        // stdin may already be gone; killing below is the real cleanup.
+      }
       this.process.kill();
       this.process = null;
     }
+    this.queue = Promise.resolve();
   }
 
   /**

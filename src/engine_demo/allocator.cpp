@@ -49,13 +49,15 @@ void* allocator::allocate(std::size_t n, std::size_t alignment) noexcept {
     if ((alignment & (alignment - 1)) != 0)
         return nullptr;  // not a power of two
 
-    // BUG-001: bounds check uses raw m_offset before alignment is applied.
-    if (m_offset + n > m_capacity) {
+    // Align the absolute address, then convert back to a buffer-relative offset.
+    const auto base_addr    = reinterpret_cast<std::uintptr_t>(m_buffer);
+    const auto aligned_addr = align_up(base_addr + m_offset, alignment);
+    const auto aligned_off  = aligned_addr - base_addr;
+    if (aligned_off + n > m_capacity) {
         return nullptr;
     }
-    m_offset = align_up(m_offset, alignment);
-    m_offset += n;
-    return m_buffer + (m_offset - n);
+    m_offset = aligned_off + n;
+    return m_buffer + aligned_off;
 }
 
 void* allocator::allocate(std::size_t n, std::size_t alignment, std::size_t /*offset*/) noexcept {

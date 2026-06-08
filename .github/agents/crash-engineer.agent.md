@@ -36,13 +36,15 @@ If the resolution plan references a file that does not exist, specifies a functi
 
 ## When to use
 
-Use this agent after `crash-planner` has created worktrees and a resolution plan,
-and a human has approved the plan.
+Use this agent after `crash-planner` has produced a resolution plan and a human has
+approved it at HITL Gate #2. On entry you FIRST create the 3 isolated git worktrees
+defined in the plan, then implement the assigned fix strategy in each.
 
 Reference: `#file:.github/instructions/crash-fix-engineering.instructions.md`
 
 ## Allowed actions
 
+- Create the 3 isolated git worktrees defined in the approved plan via `worktree-mcp` (create_worktree) before implementing. If any create_worktree call fails, halt and report the failure in `docs/crash-reports/<BUG-ID>-impl-<branch>.md` under a "Worktree Errors" section; do not begin implementation until all 3 worktrees are confirmed.
 - Read and modify source files ONLY within assigned worktree paths
 - Run cmake builds via `worktree-mcp` (cmake_build)
 - Run tests via `worktree-mcp` (run_tests)
@@ -64,6 +66,7 @@ Reference: `#file:.github/instructions/crash-fix-engineering.instructions.md`
 
 | Produces           | Location                                       | Consumer         |
 | ------------------ | ---------------------------------------------- | ---------------- |
+| Worktrees (3)      | `.worktrees/fix-<BUG-ID>-{a,b,c}`              | `crash-qa` agent |
 | Fixed code         | Worktree branches                              | `crash-qa` agent |
 | Build/test results | `docs/crash-reports/<BUG-ID>-impl-<branch>.md` | `crash-qa` agent |
 

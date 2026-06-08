@@ -23,9 +23,9 @@ handoffs:
   - label: "🛠 Implement Fixes"
     agent: crash-engineer
     prompt: |
-      Context: The resolution plan for <BUG-ID> is approved at HITL Gate #2 and 3 worktrees exist.
-      Objective: Implement the approved fix strategy in all 3 worktree branches.
-      Requirements: Stay within each assigned worktree; honor specs/constitution.md (EASTL, no exceptions, no RTTI, allocator-aware); every change compiles.
+      Context: The resolution plan for <BUG-ID> is approved at HITL Gate #2; the plan defines 3 fix branches but worktrees are not yet created.
+      Objective: Create the 3 worktrees from the plan, then implement the approved fix strategy in each branch.
+      Requirements: Create the 3 worktrees via worktree-mcp create_worktree first; stay within each assigned worktree; honor specs/constitution.md (EASTL, no exceptions, no RTTI, allocator-aware); every change compiles.
       Expectations: docs/crash-reports/<BUG-ID>-impl-<branch>.md per branch, then handoff to crash-qa.
     send: false
   - label: "🧪 Run QA Validation"
@@ -96,7 +96,7 @@ Reference: `#file:docs/crash-dump-sdlc-runbook.md`
 2. HITL GATE #1   → human reviews analysis
 3. PLAN           → crash-planner (design 3 parallel fix branches)
 4. HITL GATE #2   → human approves plan
-5. IMPLEMENT      → crash-engineer (code fixes in worktrees × 3)
+5. IMPLEMENT      → crash-engineer (create 3 worktrees, then code fixes × 3)
 6. QA             → crash-qa (test all branches, regression tests)
 7. VALIDATE       → crash-validator (present comparison + recommendation)
 8. HITL GATE #3   → human selects branch to merge

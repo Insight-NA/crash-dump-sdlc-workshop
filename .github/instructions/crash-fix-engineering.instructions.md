@@ -22,7 +22,7 @@ main repo/
 
 ### Protocol per branch
 
-1. Switch to your assigned worktree path
+1. Create your assigned worktree from the approved plan via `worktree-mcp` (create_worktree), then switch to its path
 2. Read the resolution plan for your branch's strategy
 3. Implement the minimum viable fix (smallest change that resolves the crash)
 4. Build with `cmake_build` — must produce ZERO errors

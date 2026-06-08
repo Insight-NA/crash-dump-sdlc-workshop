@@ -86,11 +86,11 @@ cd tools/worktree-mcp && npm install && cd ../..
 
 **What happens**:
 - Each hypothesis is converted into a fix strategy
-- 3 git worktrees are created (isolated branches)
+- 3 worktree branches are defined in the plan (created later by the engineer)
 - Acceptance criteria defined per branch
 - Risk assessment produced
 
-**Output**: `docs/crash-reports/BUG-XXX-plan.md` + 3 worktrees
+**Output**: `docs/crash-reports/BUG-XXX-plan.md` (worktrees not yet created)
 
 ---
 
@@ -112,11 +112,12 @@ Respond: APPROVE / REJECT / REVISE
 **Mode**: `crash-engineer`
 
 **What happens** (per branch):
-1. Engineer reads the plan for their assigned branch
-2. Implements the minimum viable fix
-3. Runs `cmake_build` — must compile cleanly
-4. Runs `run_tests` — must maintain pass rate
-5. Documents changes
+1. Engineer creates the assigned worktree from the approved plan (`create_worktree`)
+2. Reads the plan for their assigned branch
+3. Implements the minimum viable fix
+4. Runs `cmake_build` — must compile cleanly
+5. Runs `run_tests` — must maintain pass rate
+6. Documents changes
 
 **Output**: `docs/crash-reports/BUG-XXX-impl-{a,b,c}.md`
 
